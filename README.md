@@ -160,7 +160,6 @@ WHERE
 salary>=10000 AND salary <=20000; 
 #2:查询部门编号不是在90到110 之间，或者工资高于15000的员工信息 
 SELECT 
-* 
 FROM 
 employees 
 WHERE 
