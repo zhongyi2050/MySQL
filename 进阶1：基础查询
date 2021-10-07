@@ -181,6 +181,6 @@ between and
 in
 is null /is not null：用于判断null值
 is null PK <=>
-普通类型的数值		null值		可读性
-is null 		×				√			√
-<=>			√				√			×
+          普通类型的数值	null值	 可读性
+is null 	   	×			     	√			  √
+<=>			      √			    	√		   	×
