@@ -1,0 +1,597 @@
+#进阶6:连接查询
+
+/*
+
+含义:又称多表查询,当查询的字段来自多个表时,就会用到链接查询
+
+笛卡尔乘积限量:表1 有m行,表2有n行,结果=m*n行
+
+发生原因:没有有小的链接条件
+
+如何避免:添加有效的连接条件
+
+分类:
+
+	按年代分类:
+
+	sql92标准:仅仅支持内连接
+
+	sql99标准{推荐}:支持内连接+外连接(左外和右外)+交叉连接
+
+	按功能分类:
+
+		内连接
+
+			等值连接
+
+			非等值连接
+
+			子连接
+
+		外连接
+
+			左外连接
+
+			右外连接
+
+			全外连接
+
+		交叉连接
+
+*/
+
+SELECT * FROM beauty;
+
+SELECT * FROM boys;
+
+SELECT NAME,boyname 
+
+FROM boys,beauty
+
+WHERE beauty.boyfriend_id=boys.id;
+
+#一.sql92标准
+
+#1.等值连接
+
+/*
+
+① 多表等值连接的结果为多表的交集部分
+
+② n表连接,至少需要n-1个连接条件
+
+③ 多表的顺序没有要求
+
+④ 一般需要为表起别名
+
+⑤ 可以搭配前面介绍的所有子句使用,比如排序,分组,筛选
+
+*/
+
+#案例1:查询女神名和对应的男神名
+
+SELECT NAME,boyname 
+
+FROM boys,beauty
+
+WHERE beauty.boyfriend_id=boys.id;
+
+#案例2:查询员工名和对应的部门名
+
+SELECT last_name,department_name
+
+FROM employees,departments
+
+WHERE employees.`employee_id`=departments.`department_id`;
+
+#2.为表起别名
+
+/*
+
+①提高语句的简洁度
+
+②区分多个重名的字段
+
+注意:如果为表起了别名,则查询的字段就不能使用原来的表名去限定
+
+*/
+
+#查询员工名.工种号.工种名
+
+SELECT last_name,j.`job_id`,job_title
+
+FROM employees e,jobs j
+
+WHERE e.`job_id`=j.`job_id`;
+
+#3.两个表的顺序是否可以调换
+
+#查询员工名.工种号.工种名
+
+SELECT last_name,j.`job_id`,job_title
+
+FROM employees,jobs
+
+WHERE e.`job_id`=j.`job_id`;
+
+#4.可以加筛选么?
+
+#案例:查询有奖金的员工名.部门名
+
+SELECT last_name,department_name
+
+FROM employees e,departments d
+
+WHERE e.`department_id`d.`department_id`
+
+AND e.`commission_pct` IS NOT NULL;
+
+#案例2:查询城市命中第二个字符为o的部门名和城市名
+
+SELECT department_name,city
+
+FROM departments d,locations l
+
+WHERE d.`location_id`=l.`location_id`
+
+AND city LIKE '_o%';
+
+#5.可以加分组?可以
+
+#案例1:查询每个城市的部门个数
+
+SELECT COUNT(*) 个数,city
+
+FROM locations l,departments d
+
+WHERE d.`location_id`=l.`location_id`
+
+GROUP BY city;
+
+#案例2:查询有奖金的每个部门的部门名和部门的领导编号和该部门的最低工资
+
+SELECT department_name,e.manager_id,MIN(salary)
+
+FROM departments d,employees e
+
+WHERE d.`department_id`=e.`department_id`
+
+AND commission_pct IS NOT NULL
+
+GROUP BY department_name,d.manager_id;
+
+#6可以加排序
+
+#案例:查询每个工种的工种名和员工的个数,并且按员工个数降序
+
+SELECT job_title,COUNT(*)
+
+FROM employees e,jobs j
+
+WHERE e.`job_id`=j.`job_id`
+
+GROUP BY job_title
+
+ORDER BY COUNT(*) DESC;
+
+#7.可以实现三表连接?
+
+#案例:查询员工名.部门名和所在的城市
+
+SELECT last_name,department_name,city
+
+FROM deparments d,employees e,locations l
+
+WHERE e.`department_id`=d.`department_id`
+
+AND l.`location_id`=d.`location_id`
+
+AND city LIKE 's%'
+
+ORDER BY department_name DESC;
+
+#2.非等值连接
+
+#案例1:查询员工的工资和工资级别
+
+SELECT * FROM job_grades;
+
+SELECT salary,grade_level
+
+FROM employees e,job_grades g
+
+WHERE salary BETWEEN g.`lowest_sal` AND g.`highest_sal`
+
+AND g.`grade_level`='A';
+
+#3.自连接
+
+#案例:查询 员工名和上级的名称
+
+SELECT * FROM employees;
+
+SELECT e.employee_id,e.last_name,m.employee_id,m.last_name
+
+FROM employees e, employees m
+
+WHERE e.`manager_id`=m.`employee_id`;
+
+#一.显示员工表的最大工资,工资平均值
+
+SELECT MAX(salary),ROUND(AVG(salary),2)
+
+FROM employees;
+
+#二.查询员工表的employee_id,job_id,last_name,按dapartment_id降序,salary升序
+
+SELECT employee_id,job_id,last_name
+
+FROM employees
+
+ORDER BY department_id DESC,salary ASC;
+
+#三.查询员工表的job_id中包含 a 和 e 的,并且 a 在 e 的前面
+
+SELECT job_id
+
+FROM employees
+
+WHERE job_id LIKE '%a%e%';
+
+#四.已知表 student,里面有 id(学号),name,grade_id(年级编号)
+
+	已知表grade,里面有id(年级编号),NAME(年级名)
+
+	已知表result,里面有id,score,studentno(学号)
+
+要求查询姓名,年级名,成绩
+
+SELECT s.name,g.name,r.score
+
+FROM srudent s,grade g,result r
+
+WHERE BETWEEN s.`grade_id`=g.`id` AND s.`id`=r.`sudentNo`;
+
+#五.显示当前日期,以及去前后空格,截取字符串的函数
+
+SELECT DATE(NOW())
+
+SELECT TRIM(字符 FROM '');
+
+SELECT SUBSTR(str,satrtindex);
+
+SELECT SUBSTR(str,satrtindex,.length);
+
+/*复习
+
+排序查询
+
+一.语法
+
+SELECT 查询列表
+
+from 表
+
+where 筛选条件
+
+order by 排序列表 [asc|desc]
+
+二.特点
+
+1.asc : 升序,如果不写,默认升序
+
+  desc:降序
+
+2.排序列表 支持 单个字段,多个字段,函数,表达式,别名
+
+3.order by 的卫视一般放在查询语句的最后(除limit语句之外)
+
+常见函数
+
+一.概述
+
+功能:类似于JAVA中的方法
+
+好处:提高重用性和隐藏实现细节
+
+调用:select 函数名(实参列表);
+
+二.单行函数
+
+1.字符函数
+
+concat:连接
+
+substr:截取子串
+
+upper:变大写
+
+lower:变小写
+
+replace:替换
+
+length: 获取字节长度
+
+trim:去前后空格
+
+lpad:左填充
+
+rpad:右填充
+
+instr:获取子串第一次出现的索引
+
+2.数学函数
+
+ceil:向上取整
+
+floor:向下取整
+
+round:四色五入
+
+mod:取模
+
+floor:向下取整
+
+truncate:截断
+
+rand:获取随机数,返回0-1之间的小树
+
+3.日期函数
+
+now:返回当前日期+时间
+
+year:返回年
+
+month:返回月
+
+date:返回日
+
+date_format:将日期转换成字符
+
+curdate:返回当前日期
+
+str_to_date:将字符转换成日期
+
+curtime:返回当前时间
+
+hour:小时
+
+minute:分钟
+
+second:秒
+
+datediff:返回两个日期相差的天数
+
+monthname:以英文形式返回月
+
+4.其他函数
+
+version 当前数据服务器的版本
+
+database 当前打开的数据库
+
+user 当前用户
+
+password(''):返回该字符的密码形式
+
+md5('字符'):返回该字符的md5加密形式
+
+select PASSWORD('wangshiyu');
+
+5.流程控制函数
+
+①if(条件表达式,表达式1.表达式2):如果条件表达式成立,返回表达式1,否则返回表达式2
+
+②case情况1
+
+case 变量或表达式或字段
+
+when 常量1 then 值1
+
+when 常量2 then 值2
+
+...
+
+else 值n
+
+end
+
+③case 情况2
+
+case
+
+when 条件1 then 值1
+
+when 条件2 then 值2
+
+...
+
+else 值n
+
+end
+
+三.分组函数
+
+1.分类
+
+max 最大值
+
+min 最小值
+
+sum 和
+
+avg 平均值
+
+count 计算个数
+
+2.特点
+
+①语法
+
+select max(字段) from 表名;
+
+②支持的类型
+
+sum和avg 一般用于处理数值型
+
+max,min,count可以处理任何数据类型
+
+③以上分组函数都忽略null
+
+④都可以搭配 distinct使用,实现去重的统计
+
+⑤count 函数
+
+count(字段):统计该字段非空值的个数
+
+count(*):统计结果集的行数
+
+案例:查询每个部门的员工个数
+
+count(1):统计结果集的行数
+
+效率上:
+
+myisam存储引擎,count(*)最高
+
+innoDB存储引擎,count(*)和count(1)效率>count(字段)
+
+⑥和分组函数一同查询的字段,要求是group by 后出现的字段
+
+分组查询
+
+一.语法
+
+select 分组函数,分组后的字段	5
+
+from 表				1
+
+{where 筛选条件}		2
+
+group by 分组的字段		3
+
+{having分组后的字段}		4
+
+{orderby 排序列表}		6
+
+二.特点
+
+		使用关键字	筛选的表	位置
+
+分组前筛选	where		原始表		group by的前面
+
+分组后筛选	having		分组后的结果	group by的后面
+
+连接查询
+
+一.含义
+
+当查询中设计到了多个表的字段
+
+select 字段1,字段2
+
+from 表1,表2,...;
+
+笛卡尔成绩:当查询多个表时,没有添加有效的连接条件,导致多个表所有行实现完全连接
+
+如何解决:添加有效的连接条件
+
+二.分类
+
+sql92:
+
+	等值
+
+	非连接
+
+	自连接
+	
+	也支持一部分外连接(用于orcle,sqlserver,mysql不支持)
+
+sql99{推荐使用}
+
+	内连接
+
+		等值
+
+		非等值
+
+		自连接
+
+	外连接
+
+		左外
+
+		右外
+
+		全外(mysql不支持)
+
+	交叉连接
+
+三.sql92语法
+
+1.等值连接
+
+语法:
+
+	select 查询列表
+
+	from 表1 别名,表2 别名
+
+	where 表1.key=表2.key
+
+	{and 筛选条件}
+
+	{group by 分组字段}
+
+	{having 分组后的筛选}
+
+	{order by 排序字段}
+
+特点:
+
+	①一般为表起别名
+
+	②多表的顺序可以调换
+
+	③n表连接至少需要n-1个连接条件
+
+	④等值连接的结果是多表的交集部分
+
+2.非等值连接
+
+语法:
+
+	select 查询列表
+
+	from 表1 别名,表2 别名
+
+	where 非等值的连接条件
+
+	{and 筛选条件}
+
+	{group by 分组字段}
+
+	{having 分组后的筛选}
+
+	{order by 排序字段}
+
+3.自连接
+
+语法:
+
+	select 查询列表
+
+	from 表 别名1,表 别名2
+
+	where 等值的连接条件
+
+	{and 筛选条件}
+
+	{group by 分组字段}
+
+	{having 分组后的筛选}
+
+	{order by 排序字段}
+
+*/
