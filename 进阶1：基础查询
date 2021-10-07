@@ -17,26 +17,18 @@ select 查询列表 from 表名；
 */
 
 USE myemployees;
-
-
-
+#1.查询表中的单个字段
 #1.查询表中的单个字段
 
 SELECT last_name FROM employees;
-
-
 
 #2、查询表中的多个字段
 
 SELECT last_name,salary,email FROM employees;
 
-
-
 #3、查询表中的所有字段
 
 SELECT`first_name`,`last_name`,`email`,`phone_number`,`job_id` FROM employees;
-
-
 
 SELECT * FROM employees;
 
@@ -44,28 +36,19 @@ SELECT * FROM employees;
 
 SELECT `name` FROM stuinfo;
 
-
-
 #4、查询常量值
 
 SELECT 1000;
 
 SELECT 'john';
 
-
-
 #5、查询表达式
 
 SELECT 100%98;
 
-
-
 #6.查询函数
 
-SELECT VERSION();
-
-
-
+SELECT VERSION()
 
 #7、起别名
 
@@ -75,8 +58,6 @@ SELECT VERSION();
 
 ②如果要查询的字段有重名的情况，使用别名可以区分开来
 
-
-
 */
 
 #方式一：
@@ -85,35 +66,21 @@ SELECT 100%98 AS 结果;
 
 SELECT last_name AS 姓，first_name AS 名 FROM employees；
 
-
-
 #方式二：
 
 SELECT last_name 姓,first_name 名 FROM employees;
-
-
 
 案例：查询salary，显示结果为 OUT put
 
 SELECT salary AS "out put" FROM employees;
 
-
-
 #8、去重
-
-
 
 #案例；查询员工表中涉及到得所有部门编号
 
 SELEC	NCT departmen_id FROM employees;
 
-
-
 #9、+号的作用
-
-
-
-
 
 /*
 
@@ -123,13 +90,9 @@ java 中的+号：
 
 ②连接符，只要有一个操作数为字符串
 
-
-
 mysql中的+号
 
 仅仅只有一个功能：运算符
-
-
 
 select 100+90;两个操作数都为数值型，则做加法运算
 
@@ -141,25 +104,13 @@ select '123'+90;其中一方为字符型，试图将字符型数值转换成数�
 
 select 'john' +90
 
-
-
 select null + 10;只要其中一方为null，则结果肯定为null
-
-
 
 */
 
-
-
 #案例：查询员工名和姓链接成一个字段，并显示为姓名
 
-
-
 SELECT CONCAT('a','b','c')
-
-
-
-
 
 SELECT CONCAT ('last_name','first_name') AS 姓名
 
@@ -167,8 +118,6 @@ FROM employees;
 
 
 SELECT last_name,jib_id,salary AS sal 
-
-
 
 #4、显示表departments的结构，并查询其中的全部数据
 
@@ -178,32 +127,24 @@ SELECT *FROM `departments`;
 
 #5、显示出表employees中的全部job_id（不能重复）
 
-
-
 SELECT DISTINCT job_id FROM employees;
-
-
 
 #6、显示出表employees的全部列。各个列之间用逗号链接，列头显示成out_put
 
+SELECT         
 
+IFNULL(commission_pct,0) AS 奖金率,
 
-SELECT 
-
-	IFNULL(commission_pct,0) AS 奖金率,
-
-	commission_pct
+commission_pct
 
 FROM
 
-	employees;
+employees;
 
-	
+SELECT        
 
-SELECT
+CONCAT(`first_name`,',',`last_name`,',',`email`,',',IFNULL(commission_pct,0)) AS out_put 
 
-	CONCAT(`first_name`,',',`last_name`,',',`email`,',',IFNULL(commission_pct,0)) AS out_put
+FROM
 
-FROM 
-
-	employees;
+employees;
